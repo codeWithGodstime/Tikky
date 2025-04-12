@@ -1,24 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
 import { useWebSocketConnection } from '../context/socket';
 
 const Board = () => {
   const [turn, setTurn] = useState('')
   const { sendMessage, lastMessage, gameId, board, setBoard, currentPlayer } = useWebSocketConnection();
-  // Handle receiving WebSocket messages
-  // useEffect(() => {
-  //   if (lastMessage) {
-  //     const data = JSON.parse(lastMessage.data);
-  //     console.log("updated message", data)
-  // }, [lastMessage]);
+
 
   useEffect(() => {
-    console.log(turn)
     if (lastMessage) {
       const data = JSON.parse(lastMessage.data);
       switch (data.type) {
         case 'move':
-          console.log("DATA>PLAYER", data)
           const newBoard = [...data.board];
           newBoard[data.position] = data.player;
           setTurn(data.player)
@@ -38,7 +30,6 @@ const Board = () => {
 
   const handleCellClick = (position) => {
     if (board[position] === '') {
-      console.log("board game_id", gameId)
       sendMessage(JSON.stringify({ type: 'make_move', position, player: currentPlayer, game_id: gameId }));
     }
   };

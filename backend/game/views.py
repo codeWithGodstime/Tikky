@@ -37,7 +37,6 @@ class CreateGame(APIView):
         channel_name = cache.get(f"channel_{username}") # the channel name is store when the user connect to the websocket
 
         if channel_layer and channel_name:
-            print("CREATOR")
             async_to_sync(channel_layer.group_add)(f"game_{game_id}", channel_name)
 
         return Response({"game_id": game_id}, status=status.HTTP_201_CREATED)
@@ -64,10 +63,7 @@ class JoinGame(APIView):
 
         if channel_layer and channel_name:
             async_to_sync(channel_layer.group_add)(f"game_{game_id}", channel_name)
-            print("This was reached")
             async_to_sync(channel_layer.group_send)(f"game_{game_id}", {"type": "join_game", "message": f"{username} joined"})
-        else:
-            print("NO")
 
         return Response({"game_id": game_id}, status=status.HTTP_200_OK)
         

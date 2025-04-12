@@ -23,11 +23,9 @@ const CreateGame = () => {
 
       switch (data.type) {
         case 'join':
-          console.log("Player joined:", data);
-          setMessage(data); // or update a players array, etc.
+          setMessage(data); 
           break;
         case 'start':
-          console.log("Game started:", data.message, data);
           const serverBoard = JSON.parse(data.game_data)
           setBoard(serverBoard.board)
           setCurrentPlayer(data.player_symbol)
@@ -46,16 +44,12 @@ const CreateGame = () => {
 
   const handleCreateGame = async () => {
     if (username.trim() === '') {
-      console.log('Please fill in both fields!');
       return;
     }
     setShouldConnect(true)
 
-    // // First, send message to WebSocket server
-    // sendMessage(JSON.stringify({ type: 'start', username }));
-
     // Check if WebSocket is open before proceeding
-    if (readyState === 1) { // 1 means OPEN
+    if (readyState === 1) { 
       try {
         const response = await fetch('http://localhost:8000/create/', {
           method: 'POST',
@@ -67,9 +61,7 @@ const CreateGame = () => {
         const data = await response.json()
 
         if (response.ok) {
-          console.log('Game creation API call successful');
           const url = `http://localhost:5173/${data['game_id']}`
-          console.log(url)
           setGameUrl(url)
           setGameId(data['game_id'])
           setIsGameCreated(true);

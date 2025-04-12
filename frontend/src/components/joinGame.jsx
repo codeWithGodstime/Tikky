@@ -8,7 +8,7 @@ const JoinGame = () => {
     const navigate = useNavigate()
     const { gameId } = useParams();
     const [isGameJoined, setIsGameJoined] = useState(false);
-    const { sendMessage, lastMessage, readyState, setUsername, setGameId, username, setShouldConnect, setBoard, setCurrentPlayer } = useWebSocketConnection();
+    const { lastMessage, readyState, setUsername, setGameId, username, setShouldConnect, setBoard, setCurrentPlayer } = useWebSocketConnection();
 
     useEffect(() => {
         if (!lastMessage) return;
@@ -18,10 +18,8 @@ const JoinGame = () => {
 
             switch (data.type) {
                 case 'join':
-                    console.log("Player joined:", data);
                     break;
                 case 'start':
-                    console.log("Game started:", data.message, data);
                     const serverBoard = JSON.parse(data.game_data)
                     setCurrentPlayer(data.player_symbol)
                     setBoard(serverBoard.board)
@@ -44,9 +42,8 @@ const JoinGame = () => {
         setShouldConnect(true)
 
         // Check if WebSocket is open before proceeding
-        if (readyState === 1) { // 1 means OPEN
+        if (readyState === 1) {
             try {
-                // Now send the join request to your API endpoint
                 const response = await fetch(`http://localhost:8000/join/${gameId}/`, {
                     method: 'POST',
                     headers: {
@@ -58,7 +55,6 @@ const JoinGame = () => {
                 const data = await response.json()
 
                 if (response.ok) {
-                    console.log('Join game API call successful');
                     setIsGameJoined(true);
                     setGameId(data['game_id'])
 

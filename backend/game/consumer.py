@@ -15,9 +15,7 @@ class GameConsumer(WebsocketConsumer):
     def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)  # make sure to parse JSON
 
-        print(data)
         if data['type'] == 'start':
-            print("REACHE HERE")
             async_to_sync(self.channel_layer.group_send)(
                 f"game_{data['game_id']}",
                 {
@@ -41,7 +39,6 @@ class GameConsumer(WebsocketConsumer):
 
     def game_start(self, event):
         game_data = cache.get(event['game_id']) #retrieven game data from 
-        print("testing", "X" if self.username == game_data['x_player_name'] else "O")
         self.send(text_data=json.dumps({
             'type': 'start',
             'message': event['message'],
@@ -126,8 +123,6 @@ class GameConsumer(WebsocketConsumer):
                 }
             )
             return
-        # switch player turn 
-        print(game, "KK")
         # Save the game and broadcast the move
         cache.set(game_id, game, 60 * 60 * 24)
         
