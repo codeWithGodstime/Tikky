@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import { useWebSocketConnection } from '../context/socket';
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 const JoinGame = () => {
     const navigate = useNavigate()
@@ -44,7 +45,7 @@ const JoinGame = () => {
         // Check if WebSocket is open before proceeding
         if (readyState === 1) {
             try {
-                const response = await fetch(`http://localhost:8000/join/${gameId}/`, {
+                const response = await fetch(`${API_URL}/join/${gameId}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

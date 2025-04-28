@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useWebSocketConnection } from '../context/socket';
 import { useNavigate } from "react-router"
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const CreateGame = () => {
 
   const navigate = useNavigate()
@@ -51,7 +53,7 @@ const CreateGame = () => {
     // Check if WebSocket is open before proceeding
     if (readyState === 1) { 
       try {
-        const response = await fetch('http://localhost:8000/create/', {
+        const response = await fetch(`${API_URL}/create/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
