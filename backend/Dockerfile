@@ -19,4 +19,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Command to run Daphne with your Django project
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "tikky.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "ticky.asgi:application"]
