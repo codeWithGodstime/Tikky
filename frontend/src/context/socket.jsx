@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 
+const API_URL = import.meta.env.VITE_SOCKET_URL;
+
 // Create a WebSocket context
 const WebSocketContext = createContext();
 
@@ -13,7 +15,7 @@ export const WebSocketProvider = ({ children }) => {
   const [board, setBoard] = useState(Array(9).fill(''))
   const [currentPlayer, setCurrentPlayer] = useState('')
   
-  const socketUrl = `ws://localhost:8000/ws/${username}/`;
+  const socketUrl = `${API_URL}/ws/${username}/`;
 
   // WebSocket hook with share: true
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {

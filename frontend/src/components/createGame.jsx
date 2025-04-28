@@ -3,6 +3,7 @@ import { useWebSocketConnection } from '../context/socket';
 import { useNavigate } from "react-router"
 
 const API_URL = import.meta.env.VITE_API_URL;
+const HOST = import.meta.env.VITE_HOST;
 
 const CreateGame = () => {
 
@@ -63,7 +64,7 @@ const CreateGame = () => {
         const data = await response.json()
 
         if (response.ok) {
-          const url = `http://localhost:5173/${data['game_id']}`
+          const url = `${HOST}/${data['game_id']}`
           setGameUrl(url)
           setGameId(data['game_id'])
           setIsGameCreated(true);
