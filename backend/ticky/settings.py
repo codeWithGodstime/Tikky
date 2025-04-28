@@ -63,7 +63,7 @@ ASGI_APPLICATION = 'ticky.asgi.application'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{env('REDIS_URL')}/1",
+        "LOCATION": f"{env('REDIS_URL')}",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 30}
