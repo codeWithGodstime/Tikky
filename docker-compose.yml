@@ -1,0 +1,35 @@
+
+services:
+
+  redis:
+    image: redis:latest
+    container_name: tikky_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # backend:
+  #   build:
+  #     context: ./backend
+  #   container_name: tikkybackend
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - redis
+  #   command: python manage.py runserver 0.0.0.0:8000
+  #   restart: unless-stopped
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   container_name: tikkyfrontend
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   command: pnpm dev
+  #   restart: unless-stopped
