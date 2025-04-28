@@ -12,7 +12,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
 
 INSTALLED_APPS = [
     "daphne",
@@ -40,7 +40,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ticky.urls'
 
-CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
+CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
 
 TEMPLATES = [
     {
@@ -58,7 +58,6 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'ticky.wsgi.application'
 ASGI_APPLICATION = 'ticky.asgi.application'
 
 CACHES = {
