@@ -27,6 +27,7 @@ class CreateGame(APIView):
             "game_over": False,
             "x_player_name": serialized_game.data['username'],
             "o_player_name": "",
+            "previous_player": None
         }
 
         username = serialized_game.data['username']

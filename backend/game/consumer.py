@@ -12,8 +12,9 @@ class GameConsumer(WebsocketConsumer):
             cache.set(f"channel_{self.username}", self.channel_name, 60*60*24)
         return super().connect()
 
-    def receive(self, text_data=None, bytes_data=None):
-        data = json.loads(text_data)  # make sure to parse JSON
+    def receive(self, text_data=None):
+        data = json.loads(text_data)
+        print("receiver called", data.get("player"))
 
         if data['type'] == 'start':
             async_to_sync(self.channel_layer.group_send)(
@@ -38,7 +39,7 @@ class GameConsumer(WebsocketConsumer):
             )
 
     def game_start(self, event):
-        game_data = cache.get(event['game_id']) #retrieven game data from 
+        game_data = cache.get(event['game_id'])
         self.send(text_data=json.dumps({
             'type': 'start',
             'message': event['message'],
@@ -49,24 +50,31 @@ class GameConsumer(WebsocketConsumer):
         }))
     
     def make_move(self, event):
-        # get game board count empty places, if non-empty spaces greater than 4 check for wins
         game_id = event['game_id']
         position = event['position']  # Expected to be int from 0 to 8
         player = event['player']
 
         game = cache.get(game_id)
         board = game['board']
+
+        print(type(position), position)
+        if position < 0 or position > 8:
+            self.send(
+                text_data=json.dumps({
+                    'type': 'error',
+                    'message': 'Invalid move. Not a valid move(0-8).'
+                })
+            )
+            return 
         
         if board[position] != "":
-        # Invalid move, already taken
-            
             self.send(text_data=json.dumps({
                 'type': 'error',
                 'message': 'Invalid move. Cell already taken.'
             }))
             return
 
-        if game['player_turn'] == player and all(board):
+        if game['previous_player'] == player:
             self.send(text_data=json.dumps({
                 'type': 'error',
                 'message': "Invalid move. Can't play two consercative moves."
@@ -76,6 +84,7 @@ class GameConsumer(WebsocketConsumer):
         # Update board
         board[position] = player
         game['board'] = board
+        game['previous_player'] = player
         game['player_turn'] = "X" if player == "O" else "O"
 
         # Check for win
@@ -108,7 +117,6 @@ class GameConsumer(WebsocketConsumer):
             )
             return
         
-        # Check for draw
         if "" not in board:
             game['game_over'] = True
             cache.set(game_id, game, 60 * 60 * 24)
@@ -123,7 +131,6 @@ class GameConsumer(WebsocketConsumer):
                 }
             )
             return
-        # Save the game and broadcast the move
         cache.set(game_id, game, 60 * 60 * 24)
         
         async_to_sync(self.channel_layer.group_send)(
@@ -139,7 +146,6 @@ class GameConsumer(WebsocketConsumer):
                 }
             )
 
-    
     def broadcast_move(self, event):
         data = {}
         if event['e'] == 'continue':
@@ -166,7 +172,6 @@ class GameConsumer(WebsocketConsumer):
         
         self.send(text_data=data)
         
-
     def join_game(self, event):
         self.send(text_data=json.dumps({
             'type': 'join',
