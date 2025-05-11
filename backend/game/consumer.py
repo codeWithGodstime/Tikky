@@ -8,15 +8,27 @@ from django.core.cache import cache
 class GameConsumer(WebsocketConsumer):
     def connect(self):
         self.username = self.scope["url_route"]["kwargs"]["username"]
-        if self.username:
-            cache.set(f"channel_{self.username}", self.channel_name, 60*60*24)
+        self.game_id = self.scope["url_route"]['kwargs']['game_id']
+
+        user_channel_name = cache.get(f"{self.username}-{self.game_id[:5]}")
+        if not user_channel_name:
+            self.close()
+
+        async_to_sync(self.channel_layer.group_add)(f"game_{self.game_id}", self.channel_name)
+
+        # join party channel name is append with join
+        if "join" in str(user_channel_name):
+            print("should send join")
+            async_to_sync(self.channel_layer.group_send)(f"game_{self.game_id}", {"type": "join_game", "message": f"{self.username} joined"})
+
         return super().connect()
 
     def receive(self, text_data=None):
         data = json.loads(text_data)
-        print("receiver called", data.get("player"))
-
+        print("receiver called", data.get("game_id"))
+        
         if data['type'] == 'start':
+            print("stating command")
             async_to_sync(self.channel_layer.group_send)(
                 f"game_{data['game_id']}",
                 {
@@ -25,6 +37,7 @@ class GameConsumer(WebsocketConsumer):
                     "game_id": data['game_id'],
                 }
             )
+            print("working supose send")
 
         elif data['type'] == 'make_move':
             async_to_sync(self.channel_layer.group_send)(
@@ -40,6 +53,7 @@ class GameConsumer(WebsocketConsumer):
 
     def game_start(self, event):
         game_data = cache.get(event['game_id'])
+        print(game_data)
         self.send(text_data=json.dumps({
             'type': 'start',
             'message': event['message'],
@@ -57,7 +71,6 @@ class GameConsumer(WebsocketConsumer):
         game = cache.get(game_id)
         board = game['board']
 
-        print(type(position), position)
         if position < 0 or position > 8:
             self.send(
                 text_data=json.dumps({

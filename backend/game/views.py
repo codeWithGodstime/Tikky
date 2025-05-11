@@ -20,9 +20,10 @@ class CreateGame(APIView):
 
         # create uuid for the game and save in cache
         board = ["" for _ in range(9)]
+        game_id = str(uuid4())
         game = {
             "board": board,
-            "uuid": str(uuid4()),
+            "uuid": game_id,
             "player_turn": "X",
             "game_over": False,
             "x_player_name": serialized_game.data['username'],
@@ -32,13 +33,8 @@ class CreateGame(APIView):
 
         username = serialized_game.data['username']
 
-        game_id = str(uuid4())
         cache.set(game_id, game, 60*60*24) 
-
-        channel_name = cache.get(f"channel_{username}") # the channel name is store when the user connect to the websocket
-
-        if channel_layer and channel_name:
-            async_to_sync(channel_layer.group_add)(f"game_{game_id}", channel_name)
+        cache.set(f"{username}-{game_id[:5]}", f"channel_{username}-{game_id[:5]}")
 
         return Response({"game_id": game_id}, status=status.HTTP_201_CREATED)
 
@@ -60,11 +56,7 @@ class JoinGame(APIView):
         cache.set(game_id, game, 60*60*24)
         username = serialized_data.data['username']
 
-        channel_name = cache.get(f"channel_{username}") # the channel name is store when the user connect to the websocket
-
-        if channel_layer and channel_name:
-            async_to_sync(channel_layer.group_add)(f"game_{game_id}", channel_name)
-            async_to_sync(channel_layer.group_send)(f"game_{game_id}", {"type": "join_game", "message": f"{username} joined"})
+        cache.set(f"{username}-{game_id[:5]}", f"channel_join_{username}-{game_id[:5]}")
 
         return Response({"game_id": game_id}, status=status.HTTP_200_OK)
         
