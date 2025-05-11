@@ -45,7 +45,7 @@ const Board = () => {
             <button
               key={index}
               onClick={() => handleCellClick(index)}
-              className={`cell w-full h-full text-4xl font-bold text-center bg-gray-100 rounded-md 
+              className={`cell w-full h-full min-w-20 min-h-20 text-4xl font-bold text-center bg-gray-100 rounded-md 
                 transition-all duration-300 
                 ${cell === "X" ? "bg-blue-300 hover:bg-blue-400 text-blue-800" : ""}
                 ${cell === "O" ? "bg-yellow-300 hover:bg-yellow-400 text-yellow-800" : ""}
