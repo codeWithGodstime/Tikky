@@ -14,8 +14,9 @@ export const WebSocketProvider = ({ children }) => {
   const [shouldConnect, setShouldConnect] = useState(false)
   const [board, setBoard] = useState(Array(9).fill(''))
   const [currentPlayer, setCurrentPlayer] = useState('')
+  const [gameStateData, setGameStateData] = useState("")
   
-  const socketUrl = `${API_URL}/ws/${username}/`;
+  const socketUrl = `${API_URL}/ws/${username}/${gameId}/`;
 
   // WebSocket hook with share: true
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
