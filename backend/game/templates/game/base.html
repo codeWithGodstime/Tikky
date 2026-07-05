@@ -134,7 +134,7 @@
         <span class="material-symbols-outlined">grid_view</span>
         <span class="font-label-sm text-label-sm uppercase">Lobby</span>
     </a>
-    <a class="flex flex-col items-center justify-center {% block nav_game_class %}text-on-surface-variant hover:text-primary transition-colors{% endblock %} w-full h-full" href="{% block nav_game_href %}#{% endblock %}">
+    <a class="flex flex-col items-center justify-center {% block nav_game_class %}{% if active_game_url %}text-on-surface-variant hover:text-primary transition-colors{% else %}text-on-surface-variant/40 pointer-events-none{% endif %}{% endblock %} w-full h-full" href="{% block nav_game_href %}{{ active_game_url|default:'#' }}{% endblock %}">
         <span class="material-symbols-outlined">sports_esports</span>
         <span class="font-label-sm text-label-sm uppercase">Active Game</span>
     </a>
