@@ -4,6 +4,8 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from django.core.cache import cache
 
+from .cache_utils import clear_game_from_cache
+
 
 class GameConsumer(WebsocketConsumer):
     def connect(self):
@@ -123,7 +125,6 @@ class GameConsumer(WebsocketConsumer):
         if winner:
             game['game_over'] = True
             game['winner'] = winner
-            cache.set(game_id, game, 60 * 60 * 24)
 
             async_to_sync(self.channel_layer.group_send)(
                 f"game_{game_id}",
@@ -135,11 +136,11 @@ class GameConsumer(WebsocketConsumer):
                     'winner': winner
                 }
             )
+            clear_game_from_cache(game_id, game)
             return
         
         if "" not in board:
             game['game_over'] = True
-            cache.set(game_id, game, 60 * 60 * 24)
             async_to_sync(self.channel_layer.group_send)(
                 f"game_{game_id}",
                 {
@@ -150,6 +151,7 @@ class GameConsumer(WebsocketConsumer):
                     'winner': None
                 }
             )
+            clear_game_from_cache(game_id, game)
             return
         cache.set(game_id, game, 60 * 60 * 24)
         

@@ -59,7 +59,8 @@
     "gameId": "{{ game_id|escapejs }}",
     "playerSymbol": "{{ player_symbol|escapejs }}",
     "wsScheme": "{{ ws_scheme|escapejs }}",
-    "isMyTurn": {{ is_my_turn|yesno:"true,false" }}
+    "isMyTurn": {{ is_my_turn|yesno:"true,false" }},
+    "lobbyUrl": "{% url 'lobby' %}"
 }
 </script>
 {% endblock %}

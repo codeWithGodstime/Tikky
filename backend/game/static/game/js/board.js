@@ -86,6 +86,9 @@
             updateTurnIndicator(false);
             document.querySelectorAll("[data-cell]").forEach((cell) => { cell.disabled = true; });
             showResults(data.message, data.winner);
+            setTimeout(() => {
+                window.location.href = config.lobbyUrl || "/";
+            }, 4000);
         } else if (data.type === "error") {
             console.error(data.message);
         }

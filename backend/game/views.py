@@ -34,7 +34,13 @@ def _player_symbol(game, username):
     return None
 
 
+def _clear_game_session(request):
+    request.session.pop("game_id", None)
+    request.session.pop("username", None)
+
+
 def lobby(request):
+    _clear_game_session(request)
     return render(request, "game/lobby.html", {
         "create_form": UsernameForm(),
         "join_form": JoinLobbyForm(),
@@ -173,7 +179,7 @@ def join_from_lobby(request):
 def waiting_room(request, game_id):
     username, game = _get_session_game(request, game_id)
     if not username or game is None:
-        raise Http404("Game not found or session expired")
+        return redirect("lobby")
 
     is_host = game["x_player_name"] == username
     opponent_joined = bool(game["o_player_name"])
@@ -194,7 +200,7 @@ def waiting_room(request, game_id):
 def play(request, game_id):
     username, game = _get_session_game(request, game_id)
     if not username or game is None:
-        raise Http404("Game not found or session expired")
+        return redirect("lobby")
 
     player_symbol = _player_symbol(game, username)
     if player_symbol is None:
