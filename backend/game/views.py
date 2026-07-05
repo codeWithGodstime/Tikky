@@ -1,5 +1,7 @@
 from uuid import uuid4
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import Http404
@@ -92,6 +94,12 @@ def _process_join(request, game_id, username, *, error_template, error_context):
     game["o_player_name"] = username
     cache.set(game_id, game, GAME_TTL)
     cache.set(f"{username}-{game_id[:5]}", f"channel_join_{username}-{game_id[:5]}")
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"game_{game_id}",
+        {"type": "join_game", "message": f"{username} joined"},
+    )
 
     request.session["username"] = username
     request.session["game_id"] = game_id

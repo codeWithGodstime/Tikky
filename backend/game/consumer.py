@@ -21,7 +21,14 @@ class GameConsumer(WebsocketConsumer):
             print("should send join")
             async_to_sync(self.channel_layer.group_send)(f"game_{self.game_id}", {"type": "join_game", "message": f"{self.username} joined"})
 
-        return super().connect()
+        super().connect()
+
+        game = cache.get(self.game_id)
+        if game and game.get("o_player_name"):
+            self.send(text_data=json.dumps({
+                "type": "join",
+                "message": f"{game['o_player_name']} joined",
+            }))
 
     def receive(self, text_data=None):
         data = json.loads(text_data)
