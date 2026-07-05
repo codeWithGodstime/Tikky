@@ -58,10 +58,34 @@
         resultsOverlay.classList.add("is-visible");
     }
 
+    function syncBoard(board) {
+        if (!Array.isArray(board)) return;
+        board.forEach((symbol, index) => {
+            if (symbol) renderCell(index, symbol);
+        });
+    }
+
+    function handleGameOver(data) {
+        if (data.position != null && data.player) {
+            renderCell(data.position, data.player);
+        }
+        syncBoard(data.board);
+        updateTurnIndicator(false);
+        document.querySelectorAll("[data-cell]").forEach((cell) => { cell.disabled = true; });
+        setTimeout(() => {
+            showResults(data.message, data.winner);
+            setTimeout(() => {
+                window.location.href = config.lobbyUrl || "/";
+            }, 4000);
+        }, 600);
+    }
+
     document.querySelectorAll("[data-cell]").forEach((cell) => {
         cell.addEventListener("click", () => {
             if (!isMyTurn || cell.disabled) return;
             const position = parseInt(cell.dataset.position, 10);
+            renderCell(position, playerSymbol);
+            updateTurnIndicator(false);
             ws.send(JSON.stringify({
                 type: "make_move",
                 position,
@@ -78,17 +102,7 @@
             renderCell(data.position, data.player);
             updateTurnIndicator(data.player !== playerSymbol);
         } else if (data.type === "game_over") {
-            if (Array.isArray(data.board)) {
-                data.board.forEach((symbol, index) => {
-                    if (symbol) renderCell(index, symbol);
-                });
-            }
-            updateTurnIndicator(false);
-            document.querySelectorAll("[data-cell]").forEach((cell) => { cell.disabled = true; });
-            showResults(data.message, data.winner);
-            setTimeout(() => {
-                window.location.href = config.lobbyUrl || "/";
-            }, 4000);
+            handleGameOver(data);
         } else if (data.type === "error") {
             console.error(data.message);
         }

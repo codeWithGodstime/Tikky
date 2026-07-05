@@ -49,16 +49,94 @@ class GameConsumer(WebsocketConsumer):
             print("working supose send")
 
         elif data['type'] == 'make_move':
+            outcome = self._apply_move(data['game_id'], data['position'], data['player'])
+            if outcome is None:
+                return
             async_to_sync(self.channel_layer.group_send)(
                 f"game_{data['game_id']}",
-                {
-                    'type': 'make_move',
-                    'message': f"{data['player']} made a move at {data['position']}",
-                    "player": data['player'],
-                    "position": data['position'],
-                    "game_id": data['game_id'],
-                }
+                {"type": "broadcast_move", **outcome},
             )
+
+    def _apply_move(self, game_id, position, player):
+        game = cache.get(game_id)
+        if game is None:
+            self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Game not found.',
+            }))
+            return None
+
+        board = game['board']
+        position = int(position)
+
+        if position < 0 or position > 8:
+            self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Invalid move. Not a valid move(0-8).',
+            }))
+            return None
+
+        if board[position] != "":
+            self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Invalid move. Cell already taken.',
+            }))
+            return None
+
+        if game['previous_player'] == player:
+            self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': "Invalid move. Can't play two consercative moves.",
+            }))
+            return None
+
+        board[position] = player
+        game['board'] = board
+        game['previous_player'] = player
+        game['player_turn'] = "X" if player == "O" else "O"
+
+        win_combinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6],
+        ]
+
+        winner = None
+        for combo in win_combinations:
+            if board[combo[0]] == board[combo[1]] == board[combo[2]] != "":
+                winner = board[combo[0]]
+                break
+
+        move = {"position": position, "player": player, "board": board}
+
+        if winner:
+            clear_game_from_cache(game_id, game)
+            return {
+                "e": "end",
+                "message": f"{winner} wins!",
+                "board": board,
+                "winner": winner,
+                **move,
+            }
+
+        if "" not in board:
+            clear_game_from_cache(game_id, game)
+            return {
+                "e": "draw",
+                "message": "It's a draw!",
+                "board": board,
+                "winner": None,
+                **move,
+            }
+
+        cache.set(game_id, game, 60 * 60 * 24)
+        return {
+            "e": "continue",
+            "message": f"{player}'s turn",
+            "board": board,
+            "winner": None,
+            **move,
+        }
 
     def game_start(self, event):
         game_data = cache.get(event['game_id'])
@@ -72,102 +150,6 @@ class GameConsumer(WebsocketConsumer):
             "player_turn": game_data['player_turn']
         }))
     
-    def make_move(self, event):
-        game_id = event['game_id']
-        position = event['position']  # Expected to be int from 0 to 8
-        player = event['player']
-
-        game = cache.get(game_id)
-        board = game['board']
-
-        if position < 0 or position > 8:
-            self.send(
-                text_data=json.dumps({
-                    'type': 'error',
-                    'message': 'Invalid move. Not a valid move(0-8).'
-                })
-            )
-            return 
-        
-        if board[position] != "":
-            self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Invalid move. Cell already taken.'
-            }))
-            return
-
-        if game['previous_player'] == player:
-            self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': "Invalid move. Can't play two consercative moves."
-            }))
-            return
-
-        # Update board
-        board[position] = player
-        game['board'] = board
-        game['previous_player'] = player
-        game['player_turn'] = "X" if player == "O" else "O"
-
-        # Check for win
-        win_combinations = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # cols
-            [0, 4, 8], [2, 4, 6]              # diagonals
-        ]
-
-        winner = None
-        for combo in win_combinations:
-            if board[combo[0]] == board[combo[1]] == board[combo[2]] != "":
-                winner = board[combo[0]]
-                break
-
-        if winner:
-            game['game_over'] = True
-            game['winner'] = winner
-
-            async_to_sync(self.channel_layer.group_send)(
-                f"game_{game_id}",
-                {
-                    'type': 'broadcast_move',
-                    "e": "end",
-                    'message': f'{winner} wins!',
-                    'board': board,
-                    'winner': winner
-                }
-            )
-            clear_game_from_cache(game_id, game)
-            return
-        
-        if "" not in board:
-            game['game_over'] = True
-            async_to_sync(self.channel_layer.group_send)(
-                f"game_{game_id}",
-                {
-                    'type': 'broadcast_move',
-                    "e": "draw",
-                    'message': 'It\'s a draw!',
-                    'board': board,
-                    'winner': None
-                }
-            )
-            clear_game_from_cache(game_id, game)
-            return
-        cache.set(game_id, game, 60 * 60 * 24)
-        
-        async_to_sync(self.channel_layer.group_send)(
-                f"game_{game_id}",
-                    {
-                    'type': 'broadcast_move',
-                    "e": "continue",
-                    "message": f"{player}'s turn",
-                    'board': board,
-                    'player': player,
-                    'position': position,
-                    "winner": None
-                }
-            )
-
     def broadcast_move(self, event):
         data = {}
         if event['e'] == 'continue':
@@ -182,14 +164,18 @@ class GameConsumer(WebsocketConsumer):
                 "type": "game_over",
                 'message': event['message'],
                 'board': event['board'],
-                'winner': event['winner']
+                'winner': event['winner'],
+                'position': event['position'],
+                'player': event['player'],
             })
         elif event['e'] == 'draw':
             data = json.dumps({
                 "type": "game_over",
                 'message': event['message'],
                 'board': event['board'],
-                'winner': event['winner']
+                'winner': event['winner'],
+                'position': event['position'],
+                'player': event['player'],
             })
         
         self.send(text_data=data)
