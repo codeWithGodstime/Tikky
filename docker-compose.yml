@@ -20,6 +20,7 @@ services:
       - ./.env
     environment:
       REDIS_URL: redis://redis:6379/0
+    command: sh -c "python manage.py migrate --noinput && daphne -b 0.0.0.0 -p 8000 ticky.asgi:application"
     depends_on:
       - redis
     restart: unless-stopped
