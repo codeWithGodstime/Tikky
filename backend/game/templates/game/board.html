@@ -1,0 +1,73 @@
+{% extends "game/base.html" %}
+{% load static %}
+
+{% block title %}NEON_TIC_TAC_TOE | MATCH{% endblock %}
+{% block body_class %}bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container{% endblock %}
+{% block background %}{% endblock %}
+
+{% block content %}
+<main class="min-h-[calc(100vh-128px)] flex flex-col items-center justify-center p-gutter relative overflow-hidden pt-24 pb-32">
+    <div class="w-full max-w-md mb-xl z-10">
+        <div class="flex justify-between items-end border border-outline-variant p-md bg-surface-container-lowest">
+            <div class="flex flex-col items-start">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">YOU</span>
+                <span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">{{ username }}</span>
+            </div>
+            <div class="flex flex-col items-center mb-base">
+                <div class="flex items-center gap-1.5 mb-sm">
+                    <div class="w-1 h-1 bg-primary status-pulse"></div>
+                    <span class="font-label-md text-label-md tracking-[0.2em] text-primary">MATCH_ID: {{ short_code }}</span>
+                </div>
+                <span class="font-label-sm text-label-sm text-outline">VS</span>
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">FOE</span>
+                <span class="font-headline-lg-mobile text-headline-lg-mobile text-secondary">{{ opponent|default:"—" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-lg z-10">
+        <div id="turn-indicator" class="px-md py-sm border border-primary bg-primary/5 flex items-center gap-3">
+            <div class="w-2 h-2 bg-primary animate-pulse"></div>
+            <h2 id="turn-text" class="font-label-md text-label-md text-primary tracking-widest uppercase">
+                {% if is_my_turn %}YOUR TURN{% else %}OPPONENT TURN{% endif %}
+            </h2>
+        </div>
+    </div>
+
+    <div id="game-board" class="w-full max-w-[400px] grid grid-cols-3 gap-0 border border-outline-variant z-10 bg-background/80 backdrop-blur-sm shadow-2xl">
+        {% for cell in board_cells %}
+        <button type="button" data-position="{{ forloop.counter0 }}" data-cell
+            class="grid-cell {{ cell.border }} border-outline-variant flex items-center justify-center group active:scale-95"
+            {% if cell.value %}disabled{% endif %}>
+            {% if cell.value == "X" %}
+            <span class="material-symbols-outlined text-[48px] text-primary neon-text-primary scale-110" style="font-variation-settings: 'FILL' 0, 'wght' 200;">close</span>
+            {% elif cell.value == "O" %}
+            <span class="material-symbols-outlined text-[48px] text-secondary neon-text-secondary scale-110" style="font-variation-settings: 'FILL' 0, 'wght' 200;">circle</span>
+            {% endif %}
+        </button>
+        {% endfor %}
+    </div>
+</main>
+
+{% include "game/results_partial.html" %}
+
+<script id="board-config" type="application/json">
+{
+    "username": "{{ username|escapejs }}",
+    "gameId": "{{ game_id|escapejs }}",
+    "playerSymbol": "{{ player_symbol|escapejs }}",
+    "wsScheme": "{{ ws_scheme|escapejs }}",
+    "isMyTurn": {{ is_my_turn|yesno:"true,false" }}
+}
+</script>
+{% endblock %}
+
+{% block nav_lobby_class %}text-on-surface-variant hover:text-primary transition-colors{% endblock %}
+{% block nav_game_class %}text-primary border-t-2 border-primary pt-1{% endblock %}
+{% block nav_game_href %}{% url 'play' game_id %}{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'game/js/board.js' %}"></script>
+{% endblock %}

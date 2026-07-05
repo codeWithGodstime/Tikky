@@ -1,0 +1,41 @@
+{% extends "game/base.html" %}
+
+{% block title %}NEON_TIC_TAC_TOE | JOIN{% endblock %}
+{% block body_class %}flex flex-col h-screen bg-background text-on-background{% endblock %}
+{% block scanline %}<div class="scanline"></div>{% endblock %}
+{% block background %}{% endblock %}
+
+{% block header_extra %}
+<div class="flex items-center gap-2">
+    <span class="pulse-square"></span>
+    <span class="font-label-sm text-label-sm text-on-surface-variant">SERVER_ONLINE</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 flex flex-col items-center justify-center relative p-gutter pt-24 pb-32">
+    <div class="z-20 w-full max-w-md flex flex-col gap-xl">
+        <div class="text-center">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-xs">SESSION_ID</p>
+            <h1 class="font-display-lg text-display-lg text-primary tracking-tighter select-all border-b border-outline-variant pb-base inline-block">#{{ short_code }}</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-md">Enter your callsign to join the grid.</p>
+        </div>
+
+        <form method="post" class="flex flex-col gap-md p-md border border-outline-variant bg-surface-container-lowest">
+            {% csrf_token %}
+            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Operator Callsign</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <p class="font-label-sm text-label-sm text-error">{{ form.username.errors.0 }}</p>
+            {% endif %}
+            <button type="submit" class="w-full py-md border border-primary text-primary font-label-md text-label-md uppercase tracking-widest bg-transparent hover:bg-primary hover:text-background transition-all duration-200">
+                Join Room
+            </button>
+        </form>
+    </div>
+</main>
+{% endblock %}
+
+{% block nav_lobby_class %}text-on-surface-variant hover:text-primary transition-colors{% endblock %}
+{% block nav_game_class %}text-primary border-t-2 border-primary pt-1{% endblock %}
+{% block nav_game_href %}{% url 'waiting' game_id %}{% endblock %}

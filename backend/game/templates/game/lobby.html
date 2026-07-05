@@ -1,0 +1,65 @@
+{% extends "game/base.html" %}
+
+{% block title %}NEON_TIC_TAC_TOE | LOBBY{% endblock %}
+
+{% block content %}
+<main class="relative pt-24 pb-32 px-margin-mobile max-w-2xl mx-auto flex flex-col gap-12">
+    <section class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+            <div class="pulse-square"></div>
+            <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">System Online</span>
+        </div>
+        <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface uppercase tracking-tight">Main Lobby</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-sm">Select an operation to begin. Real-time synchronization active.</p>
+    </section>
+
+    <section class="grid grid-cols-1 gap-4">
+        <form method="post" action="{% url 'create' %}" class="flex flex-col gap-4 p-6 border border-outline-variant bg-surface-container-lowest">
+            {% csrf_token %}
+            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Operator Callsign</label>
+            {{ create_form.username }}
+            {% if create_form.username.errors %}
+            <p class="font-label-sm text-label-sm text-error">{{ create_form.username.errors.0 }}</p>
+            {% endif %}
+            <button type="submit" class="group flex items-center justify-between p-4 border border-outline-variant bg-surface-container-low hover:bg-primary hover:text-on-primary transition-all duration-300">
+                <div class="flex flex-col items-start gap-1">
+                    <span class="font-label-md text-label-md uppercase">Initialize Session</span>
+                    <span class="font-headline-lg-mobile text-headline-lg-mobile">Create Room</span>
+                </div>
+                <span class="material-symbols-outlined text-4xl">add_box</span>
+            </button>
+        </form>
+
+        <form method="post" action="{% url 'join_lobby' %}" class="flex flex-col gap-2 p-6 border border-outline-variant bg-surface-container-lowest focus-within:border-primary transition-colors">
+            {% csrf_token %}
+            <label class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">Access Protocol</label>
+            <div class="flex flex-col gap-3 mb-2">
+                <div class="border-b border-outline-variant py-2">{{ join_form.username }}</div>
+                {% if join_form.username.errors %}
+                <p class="font-label-sm text-label-sm text-error">{{ join_form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex-1 border-b border-outline-variant py-2 flex items-center">
+                    {{ join_form.game_id }}
+                    <div class="cursor-blink"></div>
+                </div>
+                <button type="submit" class="bg-black border border-primary text-primary px-6 py-3 font-label-md text-label-md uppercase hover:bg-primary hover:text-black transition-colors">
+                    Join
+                </button>
+            </div>
+            {% if join_form.game_id.errors %}
+            <p class="font-label-sm text-label-sm text-error">{{ join_form.game_id.errors.0 }}</p>
+            {% endif %}
+        </form>
+    </section>
+
+    <section class="flex flex-col gap-4 border border-outline-variant/30 p-6 bg-surface-container-lowest">
+        <h3 class="font-label-md text-label-md text-on-surface-variant uppercase">Quick Start</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">Create a room, share the join link with a friend, then start the match when they arrive.</p>
+    </section>
+</main>
+{% endblock %}
+
+{% block nav_lobby_class %}text-primary border-t-2 border-primary pt-1{% endblock %}
+{% block nav_game_class %}text-on-surface-variant hover:text-primary transition-colors{% endblock %}

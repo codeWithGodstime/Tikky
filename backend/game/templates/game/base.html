@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}NEON_TIC_TAC_TOE{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Geist:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-container": "#8ceaff",
+              "surface-container-high": "#2a2a2a",
+              "inverse-on-surface": "#313030",
+              "on-primary-fixed-variant": "#00530e",
+              "on-surface": "#e5e2e1",
+              "surface-dim": "#131313",
+              "secondary-fixed": "#ffdadb",
+              "on-error-container": "#ffdad6",
+              "on-primary": "#003907",
+              "on-surface-variant": "#b9ccb2",
+              "on-error": "#690005",
+              "on-secondary": "#67001d",
+              "background": "#131313",
+              "secondary-fixed-dim": "#ffb2b8",
+              "surface-container-lowest": "#0e0e0e",
+              "on-secondary-fixed": "#40000f",
+              "outline": "#84967e",
+              "surface-tint": "#00e639",
+              "primary-fixed": "#72ff70",
+              "surface-container-highest": "#353534",
+              "error-container": "#93000a",
+              "primary": "#ebffe2",
+              "on-secondary-container": "#5b0018",
+              "on-primary-container": "#007117",
+              "inverse-surface": "#e5e2e1",
+              "outline-variant": "#3b4b37",
+              "surface": "#131313",
+              "primary-fixed-dim": "#00e639",
+              "secondary-container": "#ff506e",
+              "surface-container": "#201f1f",
+              "on-tertiary": "#00363f",
+              "surface-container-low": "#1c1b1b",
+              "tertiary-fixed-dim": "#00daf8",
+              "tertiary": "#eefbff",
+              "error": "#ffb4ab",
+              "primary-container": "#00ff41",
+              "surface-variant": "#353534",
+              "surface-bright": "#393939",
+              "secondary": "#ffb2b8",
+              "on-tertiary-fixed": "#001f25",
+              "on-secondary-fixed-variant": "#91002d",
+              "on-background": "#e5e2e1",
+              "inverse-primary": "#006e16",
+              "on-tertiary-fixed-variant": "#004e5a",
+              "on-primary-fixed": "#002203",
+              "tertiary-fixed": "#a5eeff",
+              "on-tertiary-container": "#006a7a"
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px"
+            },
+            spacing: {
+              gutter: "16px",
+              sm: "8px",
+              "margin-mobile": "16px",
+              base: "4px",
+              lg: "24px",
+              md: "16px",
+              xs: "4px",
+              xl: "48px",
+              "margin-desktop": "32px"
+            },
+            fontFamily: {
+              "headline-lg": ["Space Grotesk"],
+              "label-sm": ["JetBrains Mono"],
+              "label-md": ["JetBrains Mono"],
+              "headline-lg-mobile": ["Space Grotesk"],
+              "body-md": ["Geist"],
+              "body-lg": ["Geist"],
+              "display-lg": ["Space Grotesk"]
+            },
+            fontSize: {
+              "headline-lg": ["32px", { lineHeight: "1.2", fontWeight: "600" }],
+              "label-sm": ["12px", { lineHeight: "1.4", fontWeight: "500" }],
+              "label-md": ["14px", { lineHeight: "1.4", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg-mobile": ["24px", { lineHeight: "1.2", fontWeight: "600" }],
+              "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+              "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+              "display-lg": ["64px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }]
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="{% static 'game/css/theme.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container min-h-screen{% endblock %}">
+{% block scanline %}{% endblock %}
+<header class="bg-background fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 border-b border-outline-variant">
+    <a href="{% url 'lobby' %}" class="text-headline-lg-mobile font-headline-lg-mobile text-primary uppercase tracking-tighter">
+        NEON_TIC_TAC_TOE
+    </a>
+    <div class="flex items-center gap-4">
+        {% block header_extra %}{% endblock %}
+        <span class="material-symbols-outlined text-primary">account_circle</span>
+    </div>
+</header>
+
+{% block background %}<div class="fixed inset-0 neo-grid opacity-20 pointer-events-none"></div>{% endblock %}
+
+{% if messages %}
+<div class="fixed top-16 left-0 right-0 z-50 px-margin-mobile pt-2">
+    {% for message in messages %}
+    <p class="font-label-sm text-label-sm text-error border border-error bg-surface-container-lowest p-2 mb-2">{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+{% block bottom_nav %}
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-gutter bg-surface-container-lowest border-t border-outline-variant">
+    <a class="flex flex-col items-center justify-center {% block nav_lobby_class %}text-primary border-t-2 border-primary pt-1{% endblock %} w-full h-full" href="{% url 'lobby' %}">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span class="font-label-sm text-label-sm uppercase">Lobby</span>
+    </a>
+    <a class="flex flex-col items-center justify-center {% block nav_game_class %}text-on-surface-variant hover:text-primary transition-colors{% endblock %} w-full h-full" href="{% block nav_game_href %}#{% endblock %}">
+        <span class="material-symbols-outlined">sports_esports</span>
+        <span class="font-label-sm text-label-sm uppercase">Active Game</span>
+    </a>
+</nav>
+{% endblock %}
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

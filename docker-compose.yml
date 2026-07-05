@@ -7,29 +7,25 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+    networks:
+      - tikky
 
-  # backend:
-  #   build:
-  #     context: ./backend
-  #   container_name: tikkybackend
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - ./backend:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - redis
-  #   command: python manage.py runserver 0.0.0.0:8000
-  #   restart: unless-stopped
+  backend:
+    build:
+      context: ./backend
+    container_name: tikky_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - tikky
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   container_name: tikkyfrontend
-  #   ports:
-  #     - "5173:5173"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   command: pnpm dev
-  #   restart: unless-stopped
+networks:
+  tikky:
+    driver: bridge
