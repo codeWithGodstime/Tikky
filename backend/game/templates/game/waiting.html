@@ -20,8 +20,8 @@
             <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-xs">SESSION_ID</p>
             <h1 id="room-code" class="font-display-lg text-display-lg text-primary tracking-tighter select-all border-b border-outline-variant pb-base inline-block cursor-pointer">#{{ short_code }}</h1>
             <p class="font-body-md text-body-md text-on-surface-variant mt-md">Waiting for a challenger to enter the grid...</p>
-            <p class="font-label-sm text-label-sm text-on-surface-variant mt-sm break-all">{{ join_url }}</p>
-            <button type="button" id="copy-link-btn" class="mt-sm font-label-sm text-label-sm text-primary uppercase tracking-widest hover:underline">Copy Join Link</button>
+            <p id="join-url" class="font-label-sm text-label-sm text-on-surface-variant mt-sm break-all">{{ join_url }}</p>
+            <button type="button" id="copy-link-btn" data-join-url="{{ join_url }}" class="mt-sm font-label-sm text-label-sm text-primary uppercase tracking-widest hover:underline">Copy Join Link</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-md">

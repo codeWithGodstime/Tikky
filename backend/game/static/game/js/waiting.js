@@ -52,9 +52,54 @@
         });
     }
 
+    function copyToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        }
+
+        return new Promise((resolve, reject) => {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.left = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand("copy");
+                resolve();
+            } catch (error) {
+                reject(error);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        });
+    }
+
+    function showCopiedFeedback() {
+        if (!copyBtn) return;
+        const original = copyBtn.textContent;
+        copyBtn.textContent = "COPIED!";
+        setTimeout(() => {
+            copyBtn.textContent = original;
+        }, 1500);
+    }
+
     if (copyBtn) {
         copyBtn.addEventListener("click", () => {
-            navigator.clipboard.writeText(config.joinUrl).catch(() => {});
+            const joinUrl = copyBtn.dataset.joinUrl || config.joinUrl;
+            copyToClipboard(joinUrl)
+                .then(showCopiedFeedback)
+                .catch(() => {
+                    const joinUrlEl = document.getElementById("join-url");
+                    if (joinUrlEl) {
+                        const range = document.createRange();
+                        range.selectNodeContents(joinUrlEl);
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                });
         });
     }
 
